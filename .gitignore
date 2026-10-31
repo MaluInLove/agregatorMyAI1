@@ -1,0 +1,12 @@
+node_modules/
+.npm-cache/
+.next/
+.env
+.env.local
+.env.*.local
+!.env.example
+var/storage/*
+!var/storage/.gitkeep
+*.log
+*.tsbuildinfo
+
