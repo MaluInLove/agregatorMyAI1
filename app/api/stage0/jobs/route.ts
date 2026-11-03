@@ -1,10 +1,12 @@
 import { listModelConfigurations } from "../../../../src/lib/model-configs";
 import { enqueueGenerationJob } from "../../../../src/lib/queue";
 import { validateGenerationInput } from "../../../../src/lib/generation-validation";
+import { isDenied, requireAdmin } from "../../../../src/lib/request-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request): Promise<Response> {
+  const admin = await requireAdmin(request); if (isDenied(admin)) return admin;
   try {
     const body = await request.json() as { modelConfigId?: unknown; prompt?: unknown; parameters?: unknown };
     if (typeof body.modelConfigId !== "string" || typeof body.prompt !== "string" || !body.prompt.trim()) {

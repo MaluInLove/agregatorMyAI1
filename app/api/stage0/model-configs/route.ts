@@ -1,12 +1,15 @@
 import { listModelConfigurations, setModelConfiguration, type ModelConfiguration } from "../../../../src/lib/model-configs";
+import { isDenied, requireAdmin } from "../../../../src/lib/request-auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
+  const admin = await requireAdmin(request); if (isDenied(admin)) return admin;
   return Response.json(await listModelConfigurations());
 }
 
 export async function PUT(request: Request): Promise<Response> {
+  const admin = await requireAdmin(request); if (isDenied(admin)) return admin;
   try {
     const configuration = await request.json() as ModelConfiguration;
     if (!configuration || typeof configuration.id !== "string") {

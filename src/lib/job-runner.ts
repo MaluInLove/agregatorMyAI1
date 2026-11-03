@@ -8,6 +8,8 @@ import { type ModelConfiguration, listModelConfigurations } from "./model-config
 import { PolzaApiError, PolzaClient } from "./polza.ts";
 import { claimNextGenerationJob, recordProviderEvent, type ClaimedGenerationJob } from "./queue.ts";
 import { planSafeRetry } from "./retry-policy.ts";
+import { chargeAcceptedJob, releaseJobReservation } from "./queue.ts";
+import { providerPolicyForTariff, recordMarginCost, type TariffMatch } from "./billing.ts";
 
 export async function runOneQueuedJob(workerInstanceId: string): Promise<boolean> {
   const job = await claimNextGenerationJob(workerInstanceId);
@@ -19,6 +21,9 @@ export async function runOneQueuedJob(workerInstanceId: string): Promise<boolean
     const client = new PolzaClient();
     const parameters = object(job.parameters);
     const response = await submit(client, job, config, parameters);
+    // A response from create* means Polza accepted the work. Settle the hold before
+    // any local result processing so a later download failure cannot refund it.
+    await chargeAcceptedJob(job.id);
     const providerJobId = string(response.id);
     const cost = number(object(response.usage).cost_rub) ?? number(object(response.usage).cost);
     await recordProviderEvent({ jobId: job.id, eventType: "RESPONSE", correlationId: job.correlationId, payload: response });
@@ -27,14 +32,16 @@ export async function runOneQueuedJob(workerInstanceId: string): Promise<boolean
     } else {
       await getDatabasePool().query(`UPDATE generation_jobs SET status='COMPLETED', provider_job_id=$2, provider_name=$3, completed_at=CURRENT_TIMESTAMP, actual_cost=$4::numeric, actual_cost_currency=CASE WHEN $4::numeric IS NULL THEN NULL ELSE 'RUB' END, lease_token=NULL, lease_expires_at=NULL WHERE id=$1 AND lease_token=$5`, [job.id, providerJobId, config.providerPolicy.only[0] ?? null, cost, job.leaseToken]);
     }
-    return true;
+    await recordMarginCost(job.id, cost); return true;
   } catch (error) {
     const apiError = error instanceof PolzaApiError ? error : null;
     if (apiError) {
       const retryPlan = planSafeRetry(apiError, job.attemptCount, job.maxAttempts);
       if (retryPlan) return scheduleRetry(job, apiError, retryPlan.nextRetryAt);
     }
-    return fail(job, apiError?.code ?? "WORKER_ERROR", apiError?.message ?? "Ошибка worker при обработке задачи.", apiError?.details);
+    const failed = await fail(job, apiError?.code ?? "WORKER_ERROR", apiError?.message ?? "Ошибка worker при обработке задачи.", apiError?.details);
+    if (apiError && apiError.status >= 400) await releaseJobReservation(job.id, "Polza отклонила запрос до принятия.");
+    return failed;
   }
 }
 
@@ -54,6 +61,7 @@ export async function pollSubmittedVideoJobs(): Promise<void> {
         await saveRemoteVideo(job.id, url);
         const cost = number(status.usage?.cost_rub) ?? number(status.usage?.cost);
         await getDatabasePool().query(`UPDATE generation_jobs SET status='COMPLETED', completed_at=CURRENT_TIMESTAMP, actual_cost=$2::numeric, actual_cost_currency=CASE WHEN $2::numeric IS NULL THEN NULL ELSE 'RUB' END WHERE id=$1`, [job.id, cost]);
+        await recordMarginCost(job.id, cost);
       } else if (status.status === "failed") {
         await getDatabasePool().query(`UPDATE generation_jobs SET status='FAILED', failed_at=CURRENT_TIMESTAMP, last_error_code=$2, last_error_message=$3 WHERE id=$1`, [job.id, status.error?.code ?? "POLZA_FAILED", status.error?.message ?? "Polza завершила задачу с ошибкой."]);
       } else await getDatabasePool().query("UPDATE generation_jobs SET status='PROCESSING', processing_started_at=COALESCE(processing_started_at,CURRENT_TIMESTAMP) WHERE id=$1", [job.id]);
@@ -62,9 +70,16 @@ export async function pollSubmittedVideoJobs(): Promise<void> {
 }
 
 async function submit(client: PolzaClient, job: ClaimedGenerationJob, config: ModelConfiguration, parameters: Record<string, unknown>): Promise<Record<string, unknown>> {
-  if (job.generationKind === "TEXT") return object(await client.createText({ model: config.technicalModelId, prompt: job.prompt, maxCompletionTokens: numeric(parameters.maxOutputTokens) ?? 256, user: job.correlationId, providerPolicy: config.providerPolicy }));
-  if (job.generationKind === "IMAGE") return object(await client.createImage({ model: config.technicalModelId, prompt: job.prompt, parameters, user: job.correlationId, providerPolicy: config.providerPolicy }));
-  return object(await client.createMedia({ model: config.technicalModelId, prompt: job.prompt, parameters, user: job.correlationId, providerPolicy: config.providerPolicy }));
+  const policy = tariffPolicy(job.tariffSnapshot, config.providerPolicy);
+  if (job.generationKind === "TEXT") return object(await client.createText({ model: config.technicalModelId, prompt: job.prompt, maxCompletionTokens: numeric(parameters.maxOutputTokens) ?? 256, user: job.correlationId, providerPolicy: policy }));
+  if (job.generationKind === "IMAGE") return object(await client.createImage({ model: config.technicalModelId, prompt: job.prompt, parameters, user: job.correlationId, providerPolicy: policy }));
+  return object(await client.createMedia({ model: config.technicalModelId, prompt: job.prompt, parameters, user: job.correlationId, providerPolicy: policy }));
+}
+
+function tariffPolicy(snapshot: unknown, policy: import("./model-configs.ts").ProviderPolicy) {
+  const root = object(snapshot); const maxExternalCost = numeric(root.maxExternalCost);
+  if (!maxExternalCost) return policy; // Stage 0 jobs intentionally have no tariff snapshot.
+  return providerPolicyForTariff(policy, { id: String(root.tariffVersionId ?? "snapshot"), version: numeric(root.version) ?? 1, creditPrice: numeric(root.creditPrice) ?? 0, currency: String(root.currency ?? "CREDIT"), maxExternalCost, externalCurrency: String(root.externalCurrency ?? "RUB"), parameterKey: object(root.parameters) });
 }
 
 async function fail(job: ClaimedGenerationJob, code: string, message: string, details: unknown = {}): Promise<boolean> {

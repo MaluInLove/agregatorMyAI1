@@ -1,8 +1,10 @@
 import { storeReference } from "../../../src/lib/reference-storage";
+import { isDenied, requireAdmin } from "../../../src/lib/request-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request): Promise<Response> {
+  const admin = await requireAdmin(request); if (isDenied(admin)) return admin;
   const formData = await request.formData();
   const file = formData.get("file");
   if (!(file instanceof File)) return Response.json({ error: "Нужен файл в поле file." }, { status: 400 });

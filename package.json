@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed-admin": "node scripts/seed-admin.ts",
     "db:seed-models": "node scripts/seed-models.ts",
+    "db:seed-stage1-tariffs": "node scripts/seed-stage-one-tariffs.ts",
     "stage0:import-results": "node scripts/import-stage0-results.ts",
     "test:retry-safety": "node scripts/test-retry-safety.ts"
   },

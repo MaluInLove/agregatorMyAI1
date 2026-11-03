@@ -1,9 +1,16 @@
 import { getStage0Overview } from "../src/lib/stage0-overview";
 import { Stage0Launcher } from "./stage0-launcher";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { SESSION_COOKIE, viewerFromToken } from "../src/lib/auth";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const viewer = await viewerFromToken(token);
+  if (!viewer || viewer.role !== "ADMIN") redirect("/login");
   const { diagnostics, jobs } = await getStage0Overview();
   const totalJobs = Object.values(diagnostics.queue).reduce((sum, value) => sum + value, 0);
   const queuedJobs = diagnostics.queue.QUEUED ?? 0;
@@ -13,6 +20,7 @@ export default async function HomePage() {
         <p className="eyebrow">Этап 0 · локальный стенд</p>
         <h1 id="stand-title">Интеграция AI-агрегатора</h1>
         <p>Закрытая история тестов и диагностика worker. Ключ Polza в браузер не передаётся.</p>
+        <p><Link className="file-link" href="/admin/access">Управление приглашениями и доступом →</Link></p>
         <div className="metrics">
           <div><span>Всего задач</span><strong>{totalJobs}</strong></div>
           <div><span>В очереди</span><strong>{queuedJobs}</strong></div>

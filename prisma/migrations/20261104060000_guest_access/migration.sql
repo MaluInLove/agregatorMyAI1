@@ -1,0 +1,5 @@
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'GUEST';
+
+ALTER TABLE "invitations"
+  ADD COLUMN "is_guest" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN "guest_credits" DECIMAL(18,4);
