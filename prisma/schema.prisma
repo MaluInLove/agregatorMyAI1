@@ -12,6 +12,37 @@ enum UserRole {
   USER
 }
 
+enum GenerationKind {
+  TEXT
+  IMAGE
+  VIDEO
+}
+
+enum GenerationStatus {
+  DRAFT
+  QUEUED
+  SUBMITTED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  BLOCKED
+  EXPIRED
+}
+
+enum MediaAssetKind {
+  REFERENCE
+  RESULT
+  WB_RESULT
+}
+
+enum ProviderEventType {
+  REQUEST
+  RESPONSE
+  STATUS
+  ERROR
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -20,5 +51,128 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  generationJobs GenerationJob[]
+  mediaAssets    MediaAsset[]
+  auditEvents    AuditLog[]
+
   @@map("users")
+}
+
+model ModelConfig {
+  id                     String          @id
+  displayName            String          @map("display_name")
+  technicalModelId       String          @unique @map("technical_model_id")
+  generationKind         GenerationKind  @map("generation_kind")
+  isActive               Boolean         @default(true) @map("is_active")
+  allowedParameters      Json            @default("{}") @map("allowed_parameters")
+  providerConfiguration  Json            @default("{}") @map("provider_configuration")
+  longRunningAfterSeconds Int?           @map("long_running_after_seconds")
+  createdAt              DateTime        @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt              DateTime        @updatedAt @db.Timestamptz(6) @map("updated_at")
+  generationJobs         GenerationJob[]
+
+  @@map("model_configs")
+}
+
+model GenerationJob {
+  id                    String           @id
+  userId                String?          @map("user_id")
+  modelConfigId         String           @map("model_config_id")
+  generationKind        GenerationKind   @map("generation_kind")
+  status                GenerationStatus @default(DRAFT)
+  prompt                String
+  parameters            Json             @default("{}")
+  correlationId         String           @unique @map("correlation_id")
+  idempotencyKey        String           @unique @map("idempotency_key")
+  providerName          String?          @map("provider_name")
+  providerJobId         String?          @map("provider_job_id")
+  attemptCount          Int              @default(0) @map("attempt_count")
+  maxAttempts           Int              @default(3) @map("max_attempts")
+  availableAt           DateTime         @default(now()) @db.Timestamptz(6) @map("available_at")
+  lastAttemptAt         DateTime?        @db.Timestamptz(6) @map("last_attempt_at")
+  nextRetryAt           DateTime?        @db.Timestamptz(6) @map("next_retry_at")
+  leaseToken            String?          @map("lease_token")
+  leasedAt              DateTime?        @db.Timestamptz(6) @map("leased_at")
+  leaseExpiresAt        DateTime?        @db.Timestamptz(6) @map("lease_expires_at")
+  workerInstanceId      String?          @map("worker_instance_id")
+  submittedAt           DateTime?        @db.Timestamptz(6) @map("submitted_at")
+  processingStartedAt   DateTime?        @db.Timestamptz(6) @map("processing_started_at")
+  completedAt           DateTime?        @db.Timestamptz(6) @map("completed_at")
+  failedAt              DateTime?        @db.Timestamptz(6) @map("failed_at")
+  lastErrorCode         String?          @map("last_error_code")
+  lastErrorMessage      String?          @map("last_error_message")
+  lastErrorDetails      Json?            @map("last_error_details")
+  actualCost            Decimal?         @db.Decimal(18, 6) @map("actual_cost")
+  actualCostCurrency    String?          @map("actual_cost_currency")
+  actualCostDetails     Json?            @map("actual_cost_details")
+  createdAt             DateTime         @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt             DateTime         @updatedAt @db.Timestamptz(6) @map("updated_at")
+  user                  User?            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  modelConfig           ModelConfig      @relation(fields: [modelConfigId], references: [id], onDelete: Restrict)
+  mediaAssets           MediaAsset[]
+  providerEvents        ProviderEvent[]
+
+  @@index([status, updatedAt])
+  @@index([userId, createdAt])
+  @@map("generation_jobs")
+}
+
+model MediaAsset {
+  id              String         @id
+  userId          String?        @map("user_id")
+  generationJobId String?        @map("generation_job_id")
+  kind            MediaAssetKind
+  storageKey      String         @unique @map("storage_key")
+  originalFilename String?       @map("original_filename")
+  mimeType        String         @map("mime_type")
+  byteSize        BigInt         @map("byte_size")
+  metadata        Json           @default("{}")
+  createdAt       DateTime       @default(now()) @db.Timestamptz(6) @map("created_at")
+  expiresAt       DateTime?      @db.Timestamptz(6) @map("expires_at")
+  deletedAt       DateTime?      @db.Timestamptz(6) @map("deleted_at")
+  user            User?          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  generationJob   GenerationJob? @relation(fields: [generationJobId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@map("media_assets")
+}
+
+model ProviderEvent {
+  id              String            @id
+  generationJobId String            @map("generation_job_id")
+  eventType       ProviderEventType @map("event_type")
+  providerName    String?           @map("provider_name")
+  httpStatus      Int?              @map("http_status")
+  correlationId   String            @map("correlation_id")
+  payload         Json              @default("{}")
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6) @map("created_at")
+  generationJob   GenerationJob     @relation(fields: [generationJobId], references: [id], onDelete: Restrict)
+
+  @@index([generationJobId, createdAt])
+  @@map("provider_events")
+}
+
+model AuditLog {
+  id            String    @id
+  actorUserId   String?   @map("actor_user_id")
+  action        String
+  targetType    String    @map("target_type")
+  targetId      String?   @map("target_id")
+  correlationId String?   @map("correlation_id")
+  details       Json      @default("{}")
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  actorUser     User?     @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([actorUserId, createdAt])
+  @@map("audit_log")
+}
+
+model WorkerHeartbeat {
+  instanceId String   @id @map("instance_id")
+  startedAt  DateTime @default(now()) @db.Timestamptz(6) @map("started_at")
+  lastSeenAt DateTime @default(now()) @db.Timestamptz(6) @map("last_seen_at")
+  metadata   Json     @default("{}")
+
+  @@index([lastSeenAt])
+  @@map("worker_heartbeats")
 }

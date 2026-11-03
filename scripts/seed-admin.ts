@@ -3,7 +3,7 @@ import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { Client } from "pg";
-import { requireDatabaseUrl } from "../src/lib/database";
+import { requireDatabaseUrl } from "../src/lib/database.ts";
 
 async function seedInitialAdministrator(): Promise<void> {
   const email = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();

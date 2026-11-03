@@ -1,4 +1,6 @@
-import { Client } from "pg";
+import { Client, Pool } from "pg";
+
+let pool: Pool | undefined;
 
 export function requireDatabaseUrl(): string {
   const databaseUrl = process.env.DATABASE_URL;
@@ -18,4 +20,16 @@ export async function assertDatabaseConnection(): Promise<void> {
   } finally {
     await client.end().catch(() => undefined);
   }
+}
+
+export function getDatabasePool(): Pool {
+  pool ??= new Pool({ connectionString: requireDatabaseUrl(), max: 10 });
+  return pool;
+}
+
+export async function closeDatabasePool(): Promise<void> {
+  if (!pool) return;
+  const currentPool = pool;
+  pool = undefined;
+  await currentPool.end();
 }

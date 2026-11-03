@@ -17,7 +17,7 @@ main {
 }
 
 .card {
-  width: min(100%, 680px);
+  width: min(100%, 1180px);
   border: 1px solid #2c3a50;
   border-radius: 18px;
   background: #182131;
@@ -28,7 +28,25 @@ main {
 .eyebrow { color: #72d8b2; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 h1 { margin: .5rem 0 1rem; font-size: clamp(2rem, 6vw, 3.2rem); }
 p { color: #cbd5e1; font-size: 1.05rem; line-height: 1.6; }
-dl { display: grid; gap: .75rem; margin: 2rem 0 0; }
-dl div { border-radius: 10px; background: #202c3e; padding: 1rem; }
-dt { color: #9db0ca; font-size: .9rem; }
-dd { margin: .35rem 0 0; font-weight: 700; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .75rem; margin: 1.5rem 0 2rem; }
+.metrics div { border-radius: 10px; background: #202c3e; padding: 1rem; }
+.metrics span { display: block; color: #9db0ca; font-size: .9rem; }
+.metrics strong { display: block; margin-top: .35rem; font-size: 1.1rem; }
+h2 { font-size: 1.3rem; margin: 0 0 .75rem; }
+.launcher { display: grid; grid-template-columns: minmax(16rem, .75fr) minmax(20rem, 1.25fr); gap: 1.5rem; margin: 0 0 2rem; padding: 1.25rem; border: 1px solid #35506c; border-radius: 12px; background: #152031; }
+.launcher h2 { margin-bottom: .5rem; }
+.hint, .launch-message { margin: 0; font-size: .9rem; color: #aabbd0; }
+.launcher form { display: grid; gap: .75rem; }
+.launcher label { display: grid; gap: .35rem; color: #dce7f5; font-size: .9rem; font-weight: 700; }
+.launcher input, .launcher select, .launcher textarea { width: 100%; border: 1px solid #49627f; border-radius: 8px; background: #0f1724; color: #f1f5f9; padding: .65rem .75rem; font: inherit; }
+.launcher textarea { min-height: 5.5rem; resize: vertical; }
+.launcher button { justify-self: start; border: 0; border-radius: 8px; background: #72d8b2; color: #10251e; cursor: pointer; font-weight: 700; padding: .65rem 1rem; }
+.launcher button:disabled, .launcher input:disabled, .launcher select:disabled, .launcher textarea:disabled { cursor: not-allowed; opacity: .55; }
+.launch-message { grid-column: 1 / -1; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { padding: .7rem; text-align: left; border-bottom: 1px solid #2c3a50; vertical-align: top; }
+th { color: #9db0ca; white-space: nowrap; }
+.empty { color: #9db0ca; }
+.file-link { display: block; color: #72d8b2; margin-bottom: .35rem; }
+@media (max-width: 650px) { .metrics, .launcher { grid-template-columns: 1fr; } }

@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
-import { bootstrap } from "./bootstrap";
+import { bootstrap } from "./bootstrap.ts";
 
 async function start(): Promise<void> {
   await bootstrap();
@@ -16,7 +16,7 @@ async function start(): Promise<void> {
       stdio: "inherit",
       env: process.env,
     }),
-    spawn(process.execPath, [tsxCli, "src/worker/index.ts"], { stdio: "inherit", env: process.env }),
+    spawn(process.execPath, ["src/worker/index.ts"], { stdio: "inherit", env: process.env }),
   ];
   let stopping = false;
 

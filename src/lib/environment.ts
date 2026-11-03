@@ -3,7 +3,7 @@ import path from "node:path";
 
 export function getStoragePath(): string {
   const configuredPath = process.env.LOCAL_STORAGE_PATH ?? "var/storage";
-  return path.resolve(process.cwd(), configuredPath);
+  return path.resolve(/* turbopackIgnore: true */ process.cwd(), configuredPath);
 }
 
 export async function ensureLocalStorage(): Promise<string> {

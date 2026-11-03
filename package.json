@@ -2,15 +2,19 @@
   "name": "ai-learning-aggregator",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "tsx scripts/dev.ts",
+    "dev": "node scripts/dev.ts",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check:env": "tsx scripts/check-env.ts",
+    "check:env": "node scripts/check-env.ts",
     "db:migrate": "prisma migrate deploy",
-    "db:seed-admin": "tsx scripts/seed-admin.ts"
+    "db:seed-admin": "node scripts/seed-admin.ts",
+    "db:seed-models": "node scripts/seed-models.ts",
+    "stage0:import-results": "node scripts/import-stage0-results.ts",
+    "test:retry-safety": "node scripts/test-retry-safety.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",

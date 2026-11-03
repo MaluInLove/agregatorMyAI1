@@ -1,8 +1,8 @@
 import "dotenv/config";
 
 import { spawnSync } from "node:child_process";
-import { assertDatabaseConnection } from "../src/lib/database";
-import { environmentError } from "./shared";
+import { assertDatabaseConnection } from "../src/lib/database.ts";
+import { environmentError } from "./shared.ts";
 
 function commandIsAvailable(command: string, args: string[]): boolean {
   const result = spawnSync(command, args, { stdio: "ignore" });

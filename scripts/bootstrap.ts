@@ -1,7 +1,7 @@
-import { assertDatabaseConnection } from "../src/lib/database";
-import { ensureLocalStorage } from "../src/lib/environment";
+import { assertDatabaseConnection } from "../src/lib/database.ts";
+import { ensureLocalStorage } from "../src/lib/environment.ts";
 import path from "node:path";
-import { environmentError, runNodeScript } from "./shared";
+import { environmentError, runNodeScript } from "./shared.ts";
 
 export async function bootstrap(): Promise<void> {
   try {
@@ -12,11 +12,11 @@ export async function bootstrap(): Promise<void> {
   }
 
   const prismaCli = path.join(process.cwd(), "node_modules", "prisma", "build", "index.js");
-  const tsxCli = path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs");
 
   await runNodeScript(prismaCli, ["migrate", "deploy"]);
   await runNodeScript(prismaCli, ["generate"]);
-  await runNodeScript(tsxCli, ["scripts/seed-admin.ts"]);
+  await runNodeScript("scripts/seed-admin.ts", []);
+  await runNodeScript("scripts/seed-models.ts", []);
 
   const storagePath = await ensureLocalStorage();
   console.log(`[bootstrap] Local storage ready: ${storagePath}`);
