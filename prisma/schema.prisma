@@ -82,6 +82,7 @@ model User {
   passwordHash String   @map("password_hash")
   role         UserRole @default(USER)
   displayName  String?  @map("display_name")
+  workspaceTheme String @default("light") @map("workspace_theme")
   isBlocked    Boolean  @default(false) @map("is_blocked")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -248,6 +249,8 @@ model Project {
   id String @id
   userId String @map("user_id")
   name String
+  color String @default("#D1550D")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
@@ -261,6 +264,9 @@ model Chat {
   userId String @map("user_id")
   projectId String? @map("project_id")
   title String
+  workspaceKind String @default("TEXT") @map("workspace_kind")
+  isPinned Boolean @default(false) @map("is_pinned")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
