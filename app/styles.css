@@ -145,9 +145,59 @@ th { color: #9db0ca; white-space: nowrap; }
 .workspace-sidebar .chat-group { margin:0 0 18px; }
 .workspace-sidebar .chat-group-heading,
 .workspace-sidebar .chat-group .history-label { display:flex; align-items:center; justify-content:space-between; margin:0 0 10px; color:var(--ws-text); font-size:1.17rem; line-height:1.25; letter-spacing:0; text-transform:none; }
-.workspace-sidebar .chat-group .history-label { color:var(--ws-accent); }
+.workspace-sidebar .chat-group .history-label,
+.workspace-sidebar .chat-group-heading { color:var(--ws-accent); }
 .workspace-sidebar .chat-group-heading,
 .workspace-sidebar .chat-group .history-label { width:100%; padding:0; border:0; background:transparent; text-align:left; cursor:pointer; }
 .workspace-sidebar .chat-group .history-label:disabled { cursor:default; opacity:1; }
 .workspace-sidebar .chat-group-toggle { width:14px; height:14px; object-fit:contain; filter:brightness(0) saturate(100%) invert(41%) sepia(76%) saturate(1068%) hue-rotate(350deg) brightness(87%) contrast(93%); }
+
+/* Иконки типов чатов контрастируют с текстом точным зелёным цветом из макета. */
+.workspace-sidebar .chat-kind-icon { display:inline-block; background:#586F3F; filter:none; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; }
+.chat-row:has(.chat-menu) .chat-kind-icon { background:#586F3F; filter:none; }
+
+/* Собственное окно переименования, привязанное к меню выбранного чата. */
+.rename-dialog,.delete-dialog,.project-dialog { position:fixed; z-index:30; width:300px; padding:16px; border:1px solid color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); border-radius:8px; background:var(--ws-panel); color:var(--ws-text); box-shadow:0 14px 32px rgb(0 0 0 / 32%); }
+.rename-dialog h2 { margin:0 0 12px; font-size:1.1rem; font-weight:500; }.rename-dialog label { display:grid; gap:7px; color:var(--ws-muted); font-size:.84rem; }.rename-dialog input { width:100%; padding:9px 10px; border:1px solid var(--ws-line); border-radius:6px; outline:0; background:var(--ws-bg); color:var(--ws-text); font:inherit; }.rename-dialog input:focus { border-color:color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); box-shadow:none; }.rename-dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:15px; }.rename-dialog-actions button { min-height:34px; padding:7px 11px; border:1px solid var(--ws-line); border-radius:6px; background:transparent; color:var(--ws-text); cursor:pointer; }.rename-dialog-actions .primary { border-color:transparent; background:var(--ws-accent); color:var(--ws-accent-text); }
+.delete-dialog h2 { margin:0 0 8px; font-size:1.1rem; font-weight:500; }.delete-dialog p { margin:0; color:var(--ws-muted); font-size:.86rem; line-height:1.45; }.rename-dialog-actions .danger { border-color:transparent; background:var(--ws-accent); color:var(--ws-accent-text); }
+.project-dialog h2 { margin:0 0 12px; font-size:1.1rem; font-weight:500; }.project-dialog label { display:grid; gap:7px; color:var(--ws-muted); font-size:.84rem; }.project-dialog input { width:100%; padding:9px 10px; border:1px solid var(--ws-line); border-radius:6px; outline:0; background:var(--ws-bg); color:var(--ws-text); font:inherit; }.project-dialog input:focus { border-color:color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); box-shadow:none; }
+.rename-dialog-actions .primary,
+.project-dialog .primary { background:#D1550D; }
+.project-color-field { display:grid; gap:13px; margin-top:13px; color:var(--ws-muted); font-size:.84rem; }.project-color-palette { display:grid; grid-template-columns:repeat(10,1fr); gap:5px; }.project-color-palette .color-swatch { width:100%; aspect-ratio:1; padding:0; border:1px solid transparent; border-radius:4px; cursor:pointer; }.project-color-palette .color-swatch.chosen { outline:2px solid var(--ws-text); outline-offset:2px; }.project-custom-color-row { position:relative; display:flex; align-items:center; gap:8px; }.project-custom-color { display:inline-flex; align-items:center; width:fit-content; min-height:36px; padding:7px 10px; border:1px solid var(--ws-line); border-radius:6px; background:var(--ws-bg); color:var(--ws-text); font-size:.9rem; letter-spacing:.04em; }.project-custom-swatch { flex:0 0 28px; width:28px; height:28px; padding:0; border:0; border-radius:4px; cursor:pointer; }.custom-color-picker { position:absolute; z-index:40; top:calc(100% + 10px); left:0; width:236px; padding:10px; border:1px solid color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); border-radius:7px; background:var(--ws-panel); box-shadow:0 12px 28px rgb(0 0 0 / 30%); }.custom-color-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }.color-picker-preview { width:26px; height:26px; border:2px solid var(--ws-text); border-radius:50%; }.custom-color-top button { border:0; background:transparent; color:var(--ws-muted); font-size:1.2rem; line-height:1; cursor:pointer; }.color-picker-area { position:relative; width:100%; height:132px; cursor:crosshair; }.color-picker-cursor { position:absolute; width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow:0 0 0 1px rgb(0 0 0 / 48%); transform:translate(-50%,-50%); pointer-events:none; }.project-dialog .color-hue-slider { width:100%; height:12px; margin:11px 0; padding:0; border:0; appearance:none; border-radius:999px; background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00); cursor:pointer; }.color-hue-slider::-webkit-slider-thumb { width:14px; height:14px; appearance:none; border:2px solid white; border-radius:50%; background:transparent; box-shadow:0 0 0 1px rgb(0 0 0 / 48%); }.color-picker-footer { display:flex; align-items:center; gap:8px; }.color-picker-hex { display:block; width:fit-content; padding:7px 10px; border:1px solid var(--ws-line); border-radius:5px; background:var(--ws-bg); color:var(--ws-text); font-size:.86rem; letter-spacing:.04em; }.color-picker-accept { min-height:32px; padding:6px 12px; border:0; border-radius:5px; background:#D1550D; color:var(--ws-accent-text); cursor:pointer; }.project-field-error { margin:7px 0 0; color:#EF8344; font-size:.78rem; line-height:1.35; }
+
+/* Название проекта всегда идёт сразу после цветной метки, а не у правого края. */
+.workspace-sidebar .project { justify-content:flex-start; }
+
+/* Локальный акцент навигации левой плашки. */
+.workspace-sidebar .chat-group-heading,
+.workspace-sidebar .chat-group .history-label,
+.workspace-sidebar .sidebar-tabs button.active { color:#EF8344; }
+.workspace-sidebar .sidebar-tabs button.active { border-bottom-color:#EF8344; }
+.workspace-sidebar .chat-group-toggle { display:block; width:14px; height:14px; background:#EF8344; filter:none; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; }
+
+/* Стартовая точка для работы с проектами — без яркого акцентного фона. */
+.workspace-sidebar .project-new { display:flex; align-items:center; justify-content:center; gap:8px; width:68%; min-height:42px; margin:0 auto; padding:9px 12px; border:1px solid color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); border-radius:7px; background:transparent; color:#EF8344; font-size:1rem; cursor:pointer; }
+.workspace-sidebar .project-new:hover { border-color:var(--ws-text); }.workspace-sidebar .project-new span { font-size:1.2em; line-height:1; }.workspace-sidebar .project-helper { margin:10px 0 19px; color:var(--ws-muted); font-size:.78rem; line-height:1.45; text-align:center; }.workspace-sidebar .project-list .sidebar-empty { display:none; }
 @media (max-width:1000px) { .chat-thread { position:static; width:min(100%,680px); min-height:220px; margin:1rem auto; transform:none; } }
+
+/* Обе вкладки левой панели используют одинаковый кегль и более плотный ритм. */
+.workspace-sidebar .chat-group { margin-bottom:14px; }
+.workspace-sidebar .chat-group-heading,
+.workspace-sidebar .chat-group .history-label { margin-bottom:8px; }
+.workspace-sidebar .chat-row,
+.workspace-sidebar .project { min-height:29px; }
+.workspace-sidebar .chat-row .chat-item { display:flex; align-items:center; min-height:29px; padding:0; }
+.workspace-sidebar .chat-more { min-height:29px; padding:0; line-height:1; }
+.workspace-sidebar .project-list { gap:3.6px; }
+.workspace-sidebar .project { display:flex; align-items:center; padding:0; font-size:1.17rem; line-height:normal; }
+
+/* Цветная метка показывает принадлежность чата к проекту, не заменяя его тип. */
+.workspace-sidebar .chat-project-dot { display:inline-block; width:10px; height:10px; margin:0 7px 0 0; border-radius:50%; vertical-align:1px; }
+.workspace-sidebar .project-entry + .project-entry { margin-top:3.6px; }
+.workspace-sidebar .project-chats { margin:4px 0 6px 18px; }
+.workspace-sidebar .project-empty { margin:5px 0 7px; color:var(--ws-muted); font-size:.78rem; line-height:1.35; }
+
+/* Отметка в меню однозначно показывает действующее назначение чата. */
+.chat-menu details .project-choice { display:flex; align-items:center; padding-left:6px; }
+.chat-menu details .project-choice b { flex:0 0 18px; width:18px; color:var(--ws-text); font-weight:700; text-align:center; }
+.chat-menu details .project-choice i { flex:0 0 auto; }
