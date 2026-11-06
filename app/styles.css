@@ -60,9 +60,9 @@ th { color: #9db0ca; white-space: nowrap; }
 @media (max-width:680px) { .workspace-topbar { padding:.8rem 1rem 0; }.workspace-user span,.workspace-mark { font-size:.8rem; }.workspace-topbar nav { overflow:auto; justify-content:flex-start; gap:1rem; }.workspace-grid { grid-template-columns:1fr; }.workspace-sidebar { border-right:0; border-bottom:1px solid color-mix(in srgb,var(--ws-line) 35%,transparent); }.workspace-sidebar .chat-list,.workspace-sidebar .project-list { max-height:130px; overflow:auto; }.workspace-settings { grid-template-columns:1fr; }.workspace-stage { padding:1.5rem 1rem; min-height:580px; }.stage-title { display:block; }.guest-badge { display:inline-block; margin-top:.6rem; }.workspace-topbar nav button { white-space:nowrap; }.composer-bottom { gap:.5rem; }.composer-bottom > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.workspace-sidebar { padding:1rem; } }
 
 /* Точная палитра из «темы описание.docx» и геометрия desktop-макета 1477 × 830. */
-.workspace-shell { --ws-bg:#FEFEF1; --ws-surface:#EEF7DF; --ws-panel:#EEF7DF; --ws-composer-top:#FBFDE9; --ws-composer-bottom:#EEF7DF; --ws-line:#ADBE92; --ws-text:#242005; --ws-muted:#242005; --ws-accent:#A00A0A; --ws-accent-text:#FEFEF1; }
+.workspace-shell { --ws-bg:#FEFEF1; --ws-surface:#F2F7DF; --ws-panel:#F2F7DF; --ws-composer-top:#FBFDE9; --ws-composer-bottom:#F2F7DF; --ws-line:#ADBE92; --ws-text:#242005; --ws-muted:#242005; --ws-accent:#DB5800; --ws-accent-text:#FEFEF1; }
 .workspace-shell[data-theme="forest"] { --ws-bg:#010502; --ws-surface:#020C04; --ws-panel:#020C04; --ws-composer-top:#030804; --ws-composer-bottom:#020C04; --ws-line:#7C764F; --ws-text:#CFC483; --ws-muted:#CFC483; --ws-accent:#D1550D; --ws-accent-text:#010502; }
-.workspace-shell[data-theme="aubergine"] { --ws-bg:#050103; --ws-surface:#0A0207; --ws-panel:#0A0207; --ws-composer-top:#070105; --ws-composer-bottom:#0A0207; --ws-line:#836C64; --ws-text:#A67584; --ws-muted:#A67584; --ws-accent:#EB77C6; --ws-accent-text:#050103; }
+.workspace-shell[data-theme="aubergine"] { --ws-bg:#050103; --ws-surface:#0A0207; --ws-panel:#080206; --ws-composer-top:#050103; --ws-composer-bottom:#080206; --ws-line:#836C64; --ws-text:#A67584; --ws-muted:#A67584; --ws-accent:#EB77C6; --ws-accent-text:#050103; }
 .workspace-shell { display:block; place-items:normal; width:100vw; max-width:none; height:100dvh; min-height:0; margin:0; padding:0; overflow:hidden; box-sizing:border-box; }
 .workspace-topbar { position:relative; height:6.565vh; min-height:0; padding:0 3.127vw; background:var(--ws-surface); border:0; }
 .workspace-topbar nav { position:absolute; left:50%; transform:translateX(-50%); gap:4.33vw; justify-self:auto; white-space:nowrap; }
@@ -207,13 +207,13 @@ th { color: #9db0ca; white-space: nowrap; }
 .workspace-user { gap:20px; }
 .topbar-menu { position:relative; }
 .theme-trigger,.profile-trigger { display:grid; width:34px; height:34px; place-items:center; border:1px solid color-mix(in srgb,var(--ws-line) 74%,transparent); border-radius:50%; background:transparent; color:var(--ws-text); cursor:pointer; font:inherit; }.theme-trigger { border-color:transparent; border-radius:0; }
-.theme-trigger { line-height:1; }.theme-trigger img { width:34px; height:34px; filter:var(--nav-icon-filter); }
+.theme-trigger { line-height:1; }.theme-trigger img { display:none; }.theme-trigger::before { content:""; display:block; width:34px; height:34px; background:#D35C17; -webkit-mask:url("/navigation-icons/flower.svg") center / contain no-repeat; mask:url("/navigation-icons/flower.svg") center / contain no-repeat; }
 .profile-trigger { background:var(--ws-accent); color:var(--ws-accent-text); font-size:.84rem; font-weight:800; }
 .theme-trigger:hover { border-color:transparent; }.profile-trigger:hover { border-color:var(--ws-text); }
 .theme-menu,.profile-menu { position:absolute; z-index:35; right:0; top:calc(100% + 10px); border:1px solid color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); border-radius:8px; background:var(--ws-panel); color:var(--ws-text); box-shadow:0 14px 32px rgb(0 0 0 / 32%); }
 .theme-menu { width:158px; padding:14px; }.theme-menu h2 { margin:0 0 12px; font-size:.92rem; font-weight:600; }.theme-menu .theme-switcher { gap:11px; }.theme-menu .theme-dot { width:27px; height:27px; }
 .profile-menu { width:390px; padding:18px; }.profile-menu-heading { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid color-mix(in srgb,var(--ws-line) 55%,transparent); }.profile-avatar { display:grid; flex:0 0 auto; width:42px; height:42px; place-items:center; border-radius:50%; background:var(--ws-accent); color:var(--ws-accent-text); font-size:1.17rem; font-weight:800; }.profile-menu-heading strong { display:block; font-size:1.17rem; font-weight:500; }.profile-menu-heading p { margin:4px 0 0; color:var(--ws-muted); font-size:1.17rem; line-height:1.2; }.profile-details { display:grid; gap:12px; margin:16px 0; }.profile-details div { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }.profile-details dt { color:var(--ws-muted); font-size:1.17rem; }.profile-details dd { margin:0; text-align:right; font-size:1.17rem; font-weight:500; }.profile-menu-link,.profile-logout { display:block; width:100%; min-height:42px; padding:10px 0; border:0; border-top:1px solid color-mix(in srgb,var(--ws-line) 55%,transparent); background:transparent; color:var(--ws-text); font-size:1.17rem; text-align:left; text-decoration:none; cursor:pointer; }.profile-logout { color:var(--ws-accent); }
-@media (max-width:680px) { .workspace-user { gap:11px; }.theme-trigger,.profile-trigger { width:30px; height:30px; }.theme-trigger img { width:27px; height:27px; }.profile-menu { right:-4px; }.theme-menu { right:0; } }
+@media (max-width:680px) { .workspace-user { gap:11px; }.theme-trigger,.profile-trigger { width:30px; height:30px; }.theme-trigger::before { width:27px; height:27px; }.profile-menu { right:-4px; }.theme-menu { right:0; } }
 
 /* Выбор модели — собственное тематическое меню, без системного списка браузера. */
 .model-picker { position:relative; display:grid; color:var(--ws-text); font-size:1.17rem; font-weight:400; }.model-trigger { display:flex; width:100%; min-height:46px; align-items:center; justify-content:space-between; gap:8px; padding:.5rem .65rem; border:1px solid var(--ws-line); border-radius:7px; background:var(--ws-bg); color:var(--ws-text); font:inherit; text-align:left; cursor:pointer; }.model-trigger-arrow { display:block; flex:0 0 auto; width:14px; height:8px; background:#EF8344; -webkit-mask-image:url("/navigation-icons/group-out.svg"); mask-image:url("/navigation-icons/group-out.svg"); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; }.model-menu { position:absolute; z-index:25; top:calc(100% + 6px); left:0; width:100%; padding:6px; border:1px solid color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); border-radius:7px; background:var(--ws-panel); box-shadow:0 12px 28px rgb(0 0 0 / 30%); }.model-menu button { display:flex; width:100%; min-height:42px; align-items:center; justify-content:space-between; gap:10px; padding:7px 8px; border:0; border-radius:5px; background:transparent; color:var(--ws-text); font:inherit; font-size:1.17rem; text-align:left; cursor:pointer; }.model-menu button:hover,.model-menu button[aria-selected="true"] { background:color-mix(in srgb,var(--ws-surface) 80%,var(--ws-bg)); }.model-menu b { color:#EF8344; font-size:1.17rem; }
@@ -252,3 +252,77 @@ html[data-workspace-mode="premium"] .workspace-settings::before { content:"Ра�
 .workspace-sidebar { font-size:81%; }.workspace-sidebar .sidebar-tabs button { font-size:.972rem; }.workspace-sidebar .chat-group-heading,.workspace-sidebar .chat-group .history-label,.workspace-sidebar .chat-row .chat-item strong,.workspace-sidebar .project { font-size:.948rem; }.workspace-sidebar .chat-more { font-size:1.296rem; }.workspace-sidebar .chat-kind-icon { width:16.2px; height:16.2px; margin-right:6.48px; vertical-align:-2.43px; }.workspace-sidebar .project i { width:10.53px; height:10.53px; margin-right:8.1px; }.workspace-sidebar .chat-project-dot { width:8.1px; height:8.1px; margin-right:5.67px; }.workspace-sidebar .chat-group-toggle { width:11.34px; height:11.34px; }.workspace-sidebar .project-helper,.workspace-sidebar .project-empty,.workspace-sidebar .sidebar-empty { font-size:.632rem; }.workspace-sidebar .chat-menu span,.workspace-sidebar .chat-menu button,.workspace-sidebar .chat-menu summary { font-size:.891rem; }.sidebar-new-chat-floating::before,.sidebar-new-chat-floating::after { width:14.58px; height:1.8px; }
 .workspace-settings .settings-section h2,.workspace-settings .settings-row h2,.workspace-settings .muted,.workspace-settings .reference-drop span,.workspace-settings .reference-list li,.workspace-settings .reference-list a,.workspace-settings .reference-list small,.model-picker,.model-menu button,.image-reference-info h2,.image-reference-info p,html[data-workspace-mode="premium"] .workspace-settings::before { font-size:.948rem; }.model-icon { width:15.39px; height:15.39px; }.model-label { gap:7.29px; }.model-trigger-arrow { width:11.34px; height:6.48px; }.image-setting-note,.video-duration-note { font-size:.632rem; }
 .composer-chip { min-height:29.16px; padding:0 7.29px; font-size:.948rem; }.composer-clip,.composer-send { width:29.16px; height:29.16px; }.composer-clip i { width:17.82px; height:17.82px; }.composer-aspect { gap:4.86px; }.composer-aspect i { width:9.72px; height:12.96px; border-width:1.62px; }.composer-aspect-square i { width:12.96px; height:12.96px; }.composer-cost { gap:4.86px; min-height:29.16px; padding:0 7.29px; font-size:.948rem; }.composer-cost strong { font-size:1.175rem; }.composer-cost i { width:20.25px; height:20.25px; }.composer-send i { border-top-width:7.29px; border-bottom-width:7.29px; border-left-width:11.34px; }
+
+/* На узком экране desktop-плашки больше не должны оставаться абсолютными:
+   иначе карточка референсов перекрывает рабочую область. */
+@media (max-width:1000px) {
+  .workspace-shell { height:auto; min-height:100dvh; overflow:auto; }
+  .workspace-topbar { height:auto; min-height:60px; padding:14px 24px; }
+  .workspace-grid { display:grid; grid-template-columns:220px minmax(0,1fr); grid-template-areas:"sidebar stage" "sidebar settings" "sidebar references"; align-items:start; height:auto; min-height:calc(100dvh - 60px); }
+  .workspace-sidebar { grid-area:sidebar; position:sticky; top:0; left:auto; width:auto; height:calc(100dvh - 60px); border-radius:0; }
+  .workspace-stage { grid-area:stage; min-height:560px; padding:32px 28px; }
+  .workspace-settings { grid-area:settings; position:static; width:auto; min-height:0; height:auto; padding:22px 28px; border-radius:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+  .workspace-settings .settings-section { min-width:0; }
+  .workspace-settings .image-setting-note { grid-column:1 / -1; margin:-6px 0 0; }
+  .image-reference-info { grid-area:references; position:static; width:auto; margin:0; padding:20px 28px; border-radius:0; background:var(--ws-panel); }
+  .sidebar-new-chat-floating { left:calc(220px + 12px); top:12px; }
+}
+
+@media (max-width:680px) {
+  .workspace-topbar { display:flex; flex-wrap:wrap; gap:14px; padding:12px 16px; }
+  .workspace-topbar nav { position:static; order:3; width:100%; transform:none; margin:0; gap:20px; overflow-x:auto; justify-content:flex-start; }
+  .workspace-user { position:static; margin-left:auto; }
+  .workspace-grid { display:flex; flex-direction:column; min-height:0; }
+  .workspace-sidebar { order:1; position:relative; top:auto; height:auto; max-height:310px; }
+  .workspace-sidebar .sidebar-content { max-height:257px; }
+  .workspace-sidebar .sidebar-content > .new-chat,.workspace-sidebar .sidebar-content > .project-new { display:block; }
+  .sidebar-new-chat-floating { display:none; }
+  .workspace-stage { order:2; min-height:520px; padding:26px 16px; }
+  .workspace-settings { order:3; display:grid; grid-template-columns:1fr; padding:20px 16px; gap:0; }
+  .workspace-settings .image-setting-note { grid-column:auto; }
+  .image-reference-info { order:4; padding:18px 16px; }
+}
+
+/* Профиль: личные данные, фото и одинаковый вертикальный ритм сверху и снизу. */
+.profile-menu { width:420px; padding:16px 18px 12px; }
+.profile-avatar-upload,.profile-trigger { overflow:hidden; }
+.profile-trigger:has(img) { padding:0; border-color:transparent; background:transparent; }
+.profile-avatar-upload { border:0; cursor:pointer; padding:0; }
+.profile-avatar-upload > span,.profile-trigger > span { display:block !important; width:100% !important; height:100% !important; border-radius:50%; overflow:hidden; }
+.profile-avatar img,.profile-trigger img { display:block; width:100% !important; height:100% !important; border-radius:50%; object-fit:cover; }
+.profile-photo-help { margin:10px 0 0; color:var(--ws-muted); font-size:.72rem; line-height:1.35; }
+.profile-form { display:grid; gap:9px; margin:14px 0 16px; }
+.profile-form label { display:grid; gap:5px; color:var(--ws-muted); font-size:.78rem; }
+.profile-form input,.profile-email { width:100%; min-height:34px; border:1px solid color-mix(in srgb,var(--ws-line) 72%,transparent); border-radius:6px; background:var(--ws-bg); color:var(--ws-text); padding:7px 9px; font:inherit; font-size:.84rem; }
+.profile-email { display:block; overflow-wrap:anywhere; }
+.profile-form small { color:var(--ws-muted); font-size:.68rem; line-height:1.35; }
+.profile-form .primary { justify-self:start; min-height:34px; padding:7px 11px; font-size:.8rem; }
+.profile-message { margin:0; color:var(--ws-accent); font-size:.76rem; line-height:1.35; }
+.profile-menu .profile-details { margin:14px 0; gap:9px; }
+.profile-menu .profile-menu-link,.profile-menu .profile-logout { min-height:34px; padding:7px 0; }
+.password-dialog { position:fixed; z-index:50; top:50%; left:50%; width:min(390px,calc(100vw - 32px)); padding:20px; transform:translate(-50%,-50%); border:1px solid color-mix(in srgb,var(--ws-text) 48%,var(--ws-line)); border-radius:8px; background:var(--ws-panel); color:var(--ws-text); box-shadow:0 18px 42px rgb(0 0 0 / 36%); }
+.password-dialog h2 { margin:0 0 8px; font-size:1.15rem; font-weight:500; }.password-dialog p { margin:0 0 14px; color:var(--ws-muted); font-size:.82rem; line-height:1.45; }.password-dialog label { display:grid; gap:6px; margin-top:10px; font-size:.82rem; }.password-dialog input { min-height:38px; border:1px solid var(--ws-line); border-radius:6px; background:var(--ws-bg); color:var(--ws-text); padding:8px; font:inherit; }.password-dialog .rename-dialog-actions { margin-top:16px; }
+@media (max-width:680px) { .profile-menu { width:min(420px,calc(100vw - 20px)); padding:14px; }.profile-menu .profile-menu-heading strong,.profile-menu .profile-menu-heading p,.profile-menu .profile-details dt,.profile-menu .profile-details dd { font-size:.92rem; } }
+
+/* Единый оранжевый акцент навигации, отметок и служебных деталей. */
+.sidebar-new-chat-floating,.workspace-sidebar .project-new,.workspace-sidebar .sidebar-tabs button.active,.workspace-sidebar .chat-group-heading,.workspace-sidebar .chat-group .history-label,.model-menu b,.project-field-error,.image-reference-info strong { color:#D35C17; }
+.workspace-sidebar .sidebar-tabs button.active { border-bottom-color:#D35C17; }
+.workspace-sidebar .chat-group-toggle,.model-trigger-arrow,.composer-cost i { background:#D35C17; }
+
+/* В баклажановой теме — самостоятельный акцент только для боковых панелей и переключателя тем. */
+.workspace-shell[data-theme="aubergine"] .sidebar-new-chat-floating,.workspace-shell[data-theme="aubergine"] .workspace-sidebar .project-new,.workspace-shell[data-theme="aubergine"] .workspace-sidebar .sidebar-tabs button.active,.workspace-shell[data-theme="aubergine"] .workspace-sidebar .chat-group-heading,.workspace-shell[data-theme="aubergine"] .workspace-sidebar .chat-group .history-label,.workspace-shell[data-theme="aubergine"] .model-menu b { color:#E16AA9; }
+.workspace-shell[data-theme="aubergine"] .workspace-sidebar .sidebar-tabs button.active { border-bottom-color:#E16AA9; }
+.workspace-shell[data-theme="aubergine"] .workspace-sidebar .chat-group-toggle,.workspace-shell[data-theme="aubergine"] .model-trigger-arrow { background:#E16AA9; }
+.workspace-shell[data-theme="aubergine"] .theme-trigger::before { background:#E16AA9; }
+.workspace-shell[data-theme="aubergine"] .workspace-sidebar .chat-kind-icon { background:#835413; }
+.workspace-shell[data-theme="aubergine"] .workspace-settings .model-icon { background:#835413; }
+.workspace-shell[data-theme="aubergine"] .profile-form .primary { color:var(--ws-bg); }
+.workspace-shell[data-theme="aubergine"] .profile-form .primary:disabled { opacity:1; background:color-mix(in srgb,var(--ws-accent) 55%,var(--ws-panel)); }
+
+/* Логотип в шапке сохраняет пропорции исходного векторного знака. */
+.workspace-mark { position:relative; display:block; width:82px; }
+.workspace-mark img { display:block; width:100%; height:auto; filter:var(--nav-icon-filter); }
+.workspace-mark::before,.workspace-mark::after { content:""; position:absolute; z-index:1; display:block; border-radius:50%; background:var(--ws-surface); pointer-events:none; }
+.workspace-mark::before { left:74%; top:3%; width:10%; height:16%; }
+.workspace-mark::after { left:90%; top:66%; width:10%; height:22%; }
+@media (max-width:680px) { .workspace-mark { width:68px; } }
