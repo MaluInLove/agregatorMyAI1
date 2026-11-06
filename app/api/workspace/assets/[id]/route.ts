@@ -10,7 +10,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const viewer = await requireViewer(request); if (isDenied(viewer)) return viewer;
   const { id } = await context.params;
   const result = await getDatabasePool().query<{ storageKey: string; mimeType: string; originalFilename: string | null }>(
-    `SELECT storage_key AS "storageKey",mime_type AS "mimeType",original_filename AS "originalFilename" FROM media_assets WHERE id=$1 AND kind='REFERENCE' AND deleted_at IS NULL AND user_id=$2`, [id, viewer.id],
+    `SELECT a.storage_key AS "storageKey",a.mime_type AS "mimeType",a.original_filename AS "originalFilename" FROM media_assets a LEFT JOIN generation_jobs j ON j.id=a.generation_job_id WHERE a.id=$1 AND a.kind IN ('REFERENCE','RESULT','WB_RESULT') AND a.deleted_at IS NULL AND (a.user_id=$2 OR j.user_id=$2)`, [id, viewer.id],
   );
   const asset = result.rows[0];
   if (!asset) return Response.json({ error: "Файл не найден." }, { status: 404 });
