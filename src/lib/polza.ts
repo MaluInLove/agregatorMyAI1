@@ -79,13 +79,36 @@ export class PolzaClient {
     maxCompletionTokens: number;
     user: string;
     providerPolicy: ProviderPolicy;
+    attachments?: Array<{ buffer: Buffer; filename: string; mimeType: "application/pdf" | "image/png" | "image/jpeg" }>;
   }): Promise<unknown> {
+    const hasAttachments = Boolean(input.attachments?.length);
+    const content = input.attachments?.length ? [
+      { type: "text", text: input.prompt },
+      ...input.attachments.map((attachment) => attachment.mimeType === "application/pdf"
+        ? { type: "file", file: { filename: attachment.filename, file_data: `data:application/pdf;base64,${attachment.buffer.toString("base64")}` } }
+        : { type: "image_url", image_url: { url: `data:${attachment.mimeType};base64,${attachment.buffer.toString("base64")}` } }),
+    ] : input.prompt;
+    const systemInstruction = "Отвечай в удобном для чтения Markdown. Если в ответе есть перечень фактов, шагов, вариантов, дат, полей, имён или значений, оформляй его вертикальным маркированным или нумерованным списком: один пункт на строку. Не объединяй несколько пунктов списка в одну строку. Не навязывай списки для связного текста, художественного запроса или формата, который пользователь указал явно."
+      + (hasAttachments ? " Если в прикреплённом файле есть таблица и пользователь просит её распознать или структурировать, сразу выведи Markdown-таблицу: заголовок и разделитель — на отдельных строках, каждая запись — строго на отдельной строке. Не добавляй строки, где есть только дата или другие пустые поля. Пустые ячейки оставляй пустыми; «неразборчиво» используй лишь когда в непустой ячейке действительно нельзя прочитать текст. Формат, прямо запрошенный пользователем (например CSV), имеет приоритет. После разбора прикреплённого файла закончи ответ разделом «Что ещё можно сделать» с 2–4 короткими и уместными действиями. Оформляй их маркированным списком и не предлагай то, что уже сделано в ответе." : "");
     return this.requestJson("/v1/chat/completions", {
       method: "POST",
       body: {
         model: input.model,
-        messages: [{ role: "user", content: input.prompt }],
+        messages: [
+          {
+            role: "system",
+            content: systemInstruction,
+          },
+          { role: "user", content },
+        ],
         max_tokens: input.maxCompletionTokens,
+        // DeepSeek V4 Flash includes its private reasoning tokens in this limit.
+        // For the quick-text model we need the visible answer, not a partially
+        // completed hidden chain of thought that leaves content empty.
+        ...(input.model.includes("deepseek-v4-flash") ? { thinking: { type: "disabled" } } : {}),
+        // Gemini 3 always reasons. The low setting leaves room for the visible
+        // answer in a short, ordinary chat request.
+        ...(input.model.includes("gemini-2.5") ? { reasoning_effort: "none" } : input.model.includes("gemini") ? { reasoning_effort: "low" } : {}),
         stream: false,
         user: input.user,
         provider: toPolzaProvider(input.providerPolicy),
@@ -136,8 +159,7 @@ export class PolzaClient {
     const bytes = new Uint8Array(input.buffer.byteLength);
     bytes.set(input.buffer);
     form.append("file", new Blob([bytes.buffer], { type: input.mimeType }), basename(input.filename));
-    form.append("externalUserId", input.externalUserId);
-    form.append("storagePolicy", "TEMP_UPLOAD");
+    form.append("purpose", "assistants");
     return this.requestJson("/v1/storage/upload", { method: "POST", body: form });
   }
 

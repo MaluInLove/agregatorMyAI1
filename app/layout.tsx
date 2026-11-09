@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./styles.css";
+import "./admin/access/access.css";
 
 export const metadata: Metadata = {
   title: "AI-агрегатор — стенд интеграции",

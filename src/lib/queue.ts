@@ -20,6 +20,7 @@ export type GenerationJobStatus = (typeof JOB_STATUSES)[number];
 
 export interface ClaimedGenerationJob {
   id: string;
+  userId: string | null;
   modelConfigId: string;
   correlationId: string;
   idempotencyKey: string;
@@ -48,6 +49,7 @@ export interface NewGenerationJob {
 export interface NewUserGenerationJob extends Omit<NewGenerationJob, "userId" | "parameters"> {
   userId: string;
   parameters: Record<string, unknown>;
+  referenceAssetIds?: string[];
 }
 
 export async function enqueueGenerationJob(input: NewGenerationJob): Promise<{ id: string; correlationId: string }> {
@@ -66,7 +68,10 @@ export async function enqueueGenerationJob(input: NewGenerationJob): Promise<{ i
       input.modelConfigId,
       input.generationKind,
       input.prompt,
-      JSON.stringify(sanitizeDiagnosticValue(input.parameters ?? {})),
+      // Parameters are consumed later by the worker, so they must retain their
+      // original types. Diagnostic payloads are sanitized separately in
+      // recordProviderEvent.
+      JSON.stringify(input.parameters ?? {}),
       correlationId,
       idempotencyKey,
       input.maxAttempts ?? 3,
@@ -93,25 +98,34 @@ export async function enqueueUserGenerationJob(input: NewUserGenerationJob): Pro
     const parameters = canonicalParameters(input.parameters);
     const tariff = await findActiveTariff(input.modelConfigId, parameters, client);
     if (!tariff) throw new Error("Для выбранных параметров нет активного тарифа. Генерация не запущена.");
-    const isFreeText = tariff.creditPrice === 0 && input.modelConfigId === "text-deepseek-v4-flash";
-    if (isFreeText && !isAdmin) {
+    const isDeepSeekText = input.modelConfigId === "text-deepseek-v4-flash";
+    let usesFreeAllowance = false;
+    let creditPrice = tariff.creditPrice;
+    if (isDeepSeekText && !isAdmin) {
       const allowance = await client.query<{ totalLimit: number; usedCount: number; dailyLimit: number; dayUsedCount: number; maxExternalBudget: string; reservedExternalBudget: string }>(
-        `SELECT total_limit AS "totalLimit",used_count AS "usedCount",daily_limit AS "dailyLimit",day_used_count AS "dayUsedCount",max_external_budget::text AS "maxExternalBudget",reserved_external_budget::text AS "reservedExternalBudget" FROM free_text_allowances WHERE user_id=$1 AND access_period_id=$2 FOR UPDATE`, [input.userId, accessId!]);
-      if (!allowance.rowCount) throw new Error("Бесплатный лимит DeepSeek ещё не настроен для этого доступа.");
+        `SELECT total_limit AS "totalLimit",used_count AS "usedCount",daily_limit AS "dailyLimit",
+                CASE WHEN day_starts_at=(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow')::date THEN day_used_count ELSE 0 END AS "dayUsedCount",
+                max_external_budget::text AS "maxExternalBudget",reserved_external_budget::text AS "reservedExternalBudget"
+         FROM free_text_allowances WHERE user_id=$1 AND access_period_id=$2 FOR UPDATE`, [input.userId, accessId!]);
       const row = allowance.rows[0]; const ceiling = tariff.maxExternalCost;
-      if (row.usedCount >= row.totalLimit || row.dayUsedCount >= row.dailyLimit || Number(row.reservedExternalBudget) + ceiling > Number(row.maxExternalBudget)) throw new Error("Бесплатный лимит DeepSeek исчерпан. Выберите GPT-5.4 Mini или Gemini.");
-      await client.query(`UPDATE free_text_allowances SET used_count=used_count+1,day_used_count=CASE WHEN day_starts_at=(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow')::date THEN day_used_count+1 ELSE 1 END,day_starts_at=(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow')::date,reserved_external_budget=reserved_external_budget+$3 WHERE user_id=$1 AND access_period_id=$2`, [input.userId, accessId!, ceiling]);
+      usesFreeAllowance = Boolean(row) && row.usedCount < row.totalLimit && row.dayUsedCount < row.dailyLimit && Number(row.reservedExternalBudget) + ceiling <= Number(row.maxExternalBudget);
+      if (usesFreeAllowance && row) {
+        await client.query(`UPDATE free_text_allowances SET used_count=used_count+1,day_used_count=CASE WHEN day_starts_at=(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow')::date THEN day_used_count+1 ELSE 1 END,day_starts_at=(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow')::date,reserved_external_budget=reserved_external_budget+$3 WHERE user_id=$1 AND access_period_id=$2`, [input.userId, accessId!, ceiling]);
+      } else {
+        creditPrice = 1;
+        if (await creditBalance(client, input.userId) < creditPrice) throw new Error("Бесплатный лимит DeepSeek исчерпан, а для продолжения нужен 1 кредит.");
+      }
     } else if (!isAdmin) {
       const balance = await creditBalance(client, input.userId);
-      if (balance < tariff.creditPrice) throw new Error("Недостаточно кредитов для этой генерации.");
+      if (balance < creditPrice) throw new Error("Недостаточно кредитов для этой генерации.");
     }
     await client.query(
       `INSERT INTO generation_jobs (id,user_id,model_config_id,generation_kind,status,prompt,parameters,correlation_id,idempotency_key,max_attempts,available_at,tariff_version_id,tariff_snapshot,credit_price,credit_currency)
        VALUES ($1,$2,$3,$4::"GenerationKind",'QUEUED',$5,$6::jsonb,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)`,
-      [id,input.userId,input.modelConfigId,input.generationKind,input.prompt,JSON.stringify(sanitizeDiagnosticValue(parameters)),correlationId,idempotencyKey,input.maxAttempts ?? 3,input.availableAt ?? new Date(),tariff.id,JSON.stringify({ tariffVersionId: tariff.id, version: tariff.version, parameters, creditPrice: tariff.creditPrice, currency: tariff.currency, maxExternalCost: tariff.maxExternalCost, externalCurrency: tariff.externalCurrency, freeAllowance: isFreeText && !isAdmin, adminNoInternalCharge: isAdmin }),tariff.creditPrice,tariff.currency],
+      [id,input.userId,input.modelConfigId,input.generationKind,input.prompt,JSON.stringify({ ...parameters, ...(input.referenceAssetIds?.length ? { _referenceAssetIds: input.referenceAssetIds } : {}) }),correlationId,idempotencyKey,input.maxAttempts ?? 3,input.availableAt ?? new Date(),tariff.id,JSON.stringify({ tariffVersionId: tariff.id, version: tariff.version, parameters, creditPrice, currency: tariff.currency, maxExternalCost: tariff.maxExternalCost, externalCurrency: tariff.externalCurrency, freeAllowance: usesFreeAllowance, billingTier: usesFreeAllowance ? "FREE_ALLOWANCE" : isDeepSeekText ? "PAID_AFTER_ALLOWANCE" : "STANDARD", adminNoInternalCharge: isAdmin }),creditPrice,tariff.currency],
     );
-    if (!isAdmin && tariff.creditPrice > 0) await client.query(`INSERT INTO credit_reservations (id,user_id,generation_job_id,amount,reason) VALUES ($1,$2,$3,$4,$5)`, [randomUUID(), input.userId, id, tariff.creditPrice, "Бронь перед отправкой в Polza"]);
-    await client.query("COMMIT"); return { id, correlationId, creditPrice: tariff.creditPrice };
+    if (!isAdmin && creditPrice > 0) await client.query(`INSERT INTO credit_reservations (id,user_id,generation_job_id,amount,reason) VALUES ($1,$2,$3,$4,$5)`, [randomUUID(), input.userId, id, creditPrice, usesFreeAllowance ? "Бронь перед отправкой в Polza" : isDeepSeekText ? "DeepSeek после бесплатного лимита" : "Бронь перед отправкой в Polza"]);
+    await client.query("COMMIT"); return { id, correlationId, creditPrice };
   } catch (error) { await rollbackQuietly(client); throw error; } finally { client.release(); }
 }
 
@@ -176,6 +190,7 @@ export async function claimNextGenerationJob(
            processing_started_at = COALESCE(processing_started_at, CURRENT_TIMESTAMP)
        WHERE id = $1 AND status = 'QUEUED'
        RETURNING id,
+                 user_id AS "userId",
                  model_config_id AS "modelConfigId",
                  correlation_id AS "correlationId",
                  idempotency_key AS "idempotencyKey",

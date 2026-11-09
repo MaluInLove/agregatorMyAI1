@@ -16,7 +16,7 @@ async function start(): Promise<void> {
       stdio: "inherit",
       env: process.env,
     }),
-    spawn(process.execPath, ["src/worker/index.ts"], { stdio: "inherit", env: process.env }),
+    spawn(process.execPath, [tsxCli, "watch", "src/worker/index.ts"], { stdio: "inherit", env: process.env }),
   ];
   let stopping = false;
 

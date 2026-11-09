@@ -1,5 +1,5 @@
 import { isDenied, requireViewer } from "../../../src/lib/request-auth.ts";
-import { appendChatMessage, createChat, createProject, getWorkspaceData, updateChat, updateProject, updateWorkspaceTheme } from "../../../src/lib/workspace.ts";
+import { appendChatMessage, createChat, createProject, deleteChatMessage, getWorkspaceData, updateChat, updateProject, updateWorkspaceTheme } from "../../../src/lib/workspace.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +21,6 @@ export async function POST(request: Request): Promise<Response> {
 
 export async function PATCH(request: Request): Promise<Response> {
   const viewer = await requireViewer(request); if (isDenied(viewer)) return viewer;
-  try { const body = await request.json() as { theme?: unknown; scope?: string; action?: string; id?: string; title?: string; projectId?: string | null; color?: string }; if (body.scope === "chat" && body.id && body.action) { await updateChat(viewer.id, { id: body.id, action: body.action, title: body.title, projectId: body.projectId }); return Response.json({ ok: true }); } if (body.scope === "project" && body.id && body.action) { await updateProject(viewer.id, { id: body.id, action: body.action, name: body.title, color: body.color }); return Response.json({ ok: true }); } return Response.json({ theme: await updateWorkspaceTheme(viewer.id, body.theme) }); }
+  try { const body = await request.json() as { theme?: unknown; scope?: string; action?: string; id?: string; title?: string; projectId?: string | null; color?: string }; if (body.scope === "message" && body.id && body.action === "delete") { await deleteChatMessage(viewer.id, body.id); return Response.json({ ok: true }); } if (body.scope === "chat" && body.id && body.action) { await updateChat(viewer.id, { id: body.id, action: body.action, title: body.title, projectId: body.projectId }); return Response.json({ ok: true }); } if (body.scope === "project" && body.id && body.action) { await updateProject(viewer.id, { id: body.id, action: body.action, name: body.title, color: body.color }); return Response.json({ ok: true }); } return Response.json({ theme: await updateWorkspaceTheme(viewer.id, body.theme) }); }
   catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Не удалось сохранить тему." }, { status: 400 }); }
 }

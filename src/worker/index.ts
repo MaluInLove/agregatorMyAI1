@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { closeDatabasePool, getDatabasePool } from "../lib/database.ts";
+import { expireStoredAssets } from "../lib/file-retention.ts";
 import { pollSubmittedVideoJobs, runOneQueuedJob } from "../lib/job-runner.ts";
 
 let stopping = false;
@@ -29,6 +30,7 @@ async function stop(signal: string): Promise<void> {
 
 async function start(): Promise<void> {
   await writeHeartbeat();
+  void expireStoredAssets().catch((error: unknown) => console.error(`[worker] File retention failed: ${error instanceof Error ? error.message : "unknown error"}`));
   console.log(`[worker] Stage 0 worker ${instanceId} started; heartbeat is active.`);
   setInterval(() => {
     void writeHeartbeat().catch((error: unknown) => {
@@ -38,6 +40,9 @@ async function start(): Promise<void> {
   setInterval(() => {
     void Promise.all([runOneQueuedJob(instanceId), pollSubmittedVideoJobs()]).catch((error: unknown) => console.error(`[worker] Job failed: ${error instanceof Error ? error.message : "unknown error"}`));
   }, 2_000);
+  setInterval(() => {
+    void expireStoredAssets().catch((error: unknown) => console.error(`[worker] File retention failed: ${error instanceof Error ? error.message : "unknown error"}`));
+  }, 5 * 60_000);
 }
 
 process.on("SIGINT", () => void stop("SIGINT"));

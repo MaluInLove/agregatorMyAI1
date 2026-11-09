@@ -20,7 +20,10 @@ export default async function HomePage() {
         <p className="eyebrow">Этап 0 · локальный стенд</p>
         <h1 id="stand-title">Интеграция AI-агрегатора</h1>
         <p>Закрытая история тестов и диагностика worker. Ключ Polza в браузер не передаётся.</p>
-        <p><Link className="file-link" href="/admin/access">Управление приглашениями и доступом →</Link></p>
+        <div className="stand-actions">
+          <Link className="stand-workspace-link" href="/workspace">Открыть рабочее пространство агрегатора</Link>
+          <Link className="file-link" href="/admin/access">Управление приглашениями и доступом →</Link>
+        </div>
         <div className="metrics">
           <div><span>Всего задач</span><strong>{totalJobs}</strong></div>
           <div><span>В очереди</span><strong>{queuedJobs}</strong></div>

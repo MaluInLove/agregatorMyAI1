@@ -1,6 +1,6 @@
 import type { PolzaApiError } from "./polza.ts";
 
-export const SAFE_RETRY_HTTP_STATUSES = [408, 429, 502, 503] as const;
+export const SAFE_RETRY_HTTP_STATUSES = [408, 429, 500, 502, 503, 504] as const;
 
 export interface RetryPlan {
   nextRetryAt: Date;

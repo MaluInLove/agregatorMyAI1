@@ -41,12 +41,12 @@ export const INITIAL_MODEL_CANDIDATES: readonly ModelConfiguration[] = [
     aspectRatio: ["3:4", "1:1", "16:9"],
     referenceImages: { max: 16, mimeTypes: ["image/png", "image/jpeg", "image/webp"] },
   }),
-  candidate("text-deepseek-v4-flash", "Быстрый", "candidate/deepseek-v4-flash", "TEXT", {
+  candidate("text-deepseek-v4-flash", "Быстрый", "deepseek/deepseek-v4-flash", "TEXT", {
     maxPromptCharacters: 12000,
     maxOutputTokens: 1500,
     dailyLimit: 150,
   }),
-  candidate("text-gemini-flash", "Умный", "candidate/gemini-flash", "TEXT", {
+  candidate("text-gemini-flash", "Умный", "google/gemini-3.6-flash", "TEXT", {
     maxPromptCharacters: 24000,
     maxOutputTokens: 3000,
     dailyLimit: 100,
@@ -61,18 +61,21 @@ export const INITIAL_MODEL_CANDIDATES: readonly ModelConfiguration[] = [
     resolution: ["480p", "720p"],
     durationSeconds: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     generateAudio: false,
+    referenceImages: { max: 1, mimeTypes: ["image/png", "image/jpeg", "image/webp"] },
   }, 600),
   candidate("video-seedance-2", "Seedance 2", "candidate/seedance-2", "VIDEO", {
     aspectRatio: ["3:4"],
-    resolution: ["720p", "1080p"],
+    resolution: ["480p", "720p", "1080p"],
     durationSeconds: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     generateAudio: false,
+    referenceImages: { max: 1, mimeTypes: ["image/png", "image/jpeg", "image/webp"] },
   }, 900),
   candidate("video-wan-3", "Wan 3.0", "candidate/wan-3.0", "VIDEO", {
     aspectRatio: ["3:4"],
     resolution: ["720p", "1080p"],
     durationSeconds: Array.from({ length: 29 }, (_, index) => index + 2),
     generateAudio: false,
+    referenceImages: { max: 1, mimeTypes: ["image/png", "image/jpeg", "image/webp"] },
   }, 1200),
   candidate("video-gemini-omni-flash", "Gemini Omni 1.1 Flash", "candidate/gemini-omni-1.1-flash", "VIDEO", {
     aspectRatio: ["9:16", "16:9"],

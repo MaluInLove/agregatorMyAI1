@@ -3,6 +3,7 @@ import { getDatabasePool } from "./database.ts";
 
 const sensitiveKey = /(?:api[-_]?key|authorization|cookie|password|secret|signature|token|credential|access[-_]?key|x-amz-)/i;
 const sensitiveQueryParameter = /(?:token|signature|sig|key|credential|password|secret|x-amz-)/i;
+const safeTokenMetricKey = /^(?:maxOutputTokens|(?:prompt|completion|total)_tokens(?:_details)?)$/i;
 
 function sanitizeString(value: string): string {
   try {
@@ -18,7 +19,7 @@ function sanitizeString(value: string): string {
 }
 
 export function sanitizeDiagnosticValue(value: unknown, key = ""): unknown {
-  if (sensitiveKey.test(key)) {
+  if (sensitiveKey.test(key) && !safeTokenMetricKey.test(key)) {
     return "[redacted]";
   }
 

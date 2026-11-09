@@ -28,9 +28,9 @@ export function validatePassword(value: string): void {
 export async function createInvitation(input: { actor: Viewer; email: string; displayName?: string; emergency?: boolean; guest?: boolean; guestCredits?: number }): Promise<{ token: string; expiresAt: Date }> {
   if (input.actor.role !== "ADMIN") throw new Error("Недостаточно прав.");
   const email = normalizeEmail(input.email); validateEmail(email);
-  const displayName = validateStudentName(input.displayName ?? "");
+  const displayName = input.emergency ? undefined : validateStudentName(input.displayName ?? "");
   if (input.guest && input.emergency) throw new Error("Гостевую ссылку нельзя делать аварийной.");
-  const guestCredits = input.guest ? Number(input.guestCredits ?? 50) : null;
+  const guestCredits = Number(input.guestCredits ?? (input.guest ? 50 : INITIAL_ACCESS_SETTINGS.startingCredits));
   if (guestCredits !== null && (!Number.isFinite(guestCredits) || guestCredits < 0 || guestCredits > 100_000)) throw new Error("Лимит гостевых кредитов должен быть от 0 до 100 000.");
   const existing = await getDatabasePool().query<{ isBlocked: boolean }>(`SELECT is_blocked AS "isBlocked" FROM users WHERE email=$1 LIMIT 1`, [email]);
   if (existing.rowCount && !input.emergency) throw new Error("Аккаунт с этим email уже существует. Обычное приглашение для него создавать не нужно.");
@@ -69,7 +69,7 @@ export async function activateInvitation(input: { token: string; password: strin
     await client.query(`UPDATE invitations SET status='USED',used_at=CURRENT_TIMESTAMP WHERE id=$1`, [row.id]);
     const accessId = randomUUID();
     await client.query(`INSERT INTO access_periods (id,user_id,starts_at,ends_at,status) VALUES ($1,$2,$3,$4,'ACTIVE')`, [accessId, userId, now, endsAt]);
-    const credits = guest ? Number(row.guestCredits ?? 50) : INITIAL_ACCESS_SETTINGS.startingCredits;
+    const credits = Number(row.guestCredits ?? (guest ? 50 : INITIAL_ACCESS_SETTINGS.startingCredits));
     await client.query(`INSERT INTO credit_ledger (id,user_id,amount,kind,reason,metadata) VALUES ($1,$2,$3,'GRANT',$4,$5::jsonb)`, [randomUUID(), userId, credits, guest ? "Гостевой лимит" : "Стартовый учебный пакет", JSON.stringify({ invitationId: row.id, guest })]);
     if (!guest) { const free = INITIAL_ACCESS_SETTINGS.freeDeepSeek; await client.query(`INSERT INTO free_text_allowances (id,user_id,access_period_id,total_limit,daily_limit,day_starts_at,max_external_budget) VALUES ($1,$2,$3,$4,$5,(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Moscow')::date,$6)`, [randomUUID(), userId, accessId, free.totalMessages, free.dailyMessages, free.maxExternalBudgetRub]); }
     await client.query(`INSERT INTO audit_log (id,actor_user_id,action,target_type,target_id,details) VALUES ($1,$2,'INVITATION_ACTIVATED','user',$2,$3::jsonb)`, [randomUUID(), userId, JSON.stringify({ invitationId: row.id, accessEndsAt: endsAt.toISOString() })]);

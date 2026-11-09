@@ -1,0 +1,3 @@
+.access-card form > button { align-self:start; height:46px; margin-top:30px; }
+.access-card fieldset label { align-items:center; }
+.access-card fieldset input[type="radio"] { display:block; flex:none; transform:translateY(-3px); }

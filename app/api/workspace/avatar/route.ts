@@ -7,7 +7,7 @@ export async function GET(request: Request): Promise<Response> {
   const viewer = await requireViewer(request); if (isDenied(viewer)) return viewer;
   const avatar = await readProfileAvatar(viewer.id);
   if (!avatar) return Response.json({ error: "Фотография не найдена." }, { status: 404 });
-  return new Response(avatar.data, { headers: { "Content-Type": avatar.mimeType, "Cache-Control": "private, no-store" } });
+  return new Response(new Uint8Array(avatar.data), { headers: { "Content-Type": avatar.mimeType, "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(request: Request): Promise<Response> {

@@ -387,7 +387,7 @@ model MediaAsset {
   byteSize        BigInt         @map("byte_size")
   metadata        Json           @default("{}")
   createdAt       DateTime       @default(now()) @db.Timestamptz(6) @map("created_at")
-  expiresAt       DateTime?      @db.Timestamptz(6) @map("expires_at")
+  expiresAt       DateTime?      @default(dbgenerated("(CURRENT_TIMESTAMP + '90 days'::interval)")) @db.Timestamptz(6) @map("expires_at")
   deletedAt       DateTime?      @db.Timestamptz(6) @map("deleted_at")
   user            User?          @relation(fields: [userId], references: [id], onDelete: Restrict)
   generationJob   GenerationJob? @relation(fields: [generationJobId], references: [id], onDelete: Restrict)
