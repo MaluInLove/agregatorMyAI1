@@ -4,6 +4,7 @@ import { findActiveTariff } from "./billing.ts";
 import { listModelConfigurations, type ModelConfiguration } from "./model-configs.ts";
 import { validateGenerationInput } from "./generation-validation.ts";
 import { enqueueUserGenerationJob, cancelQueuedJob, releaseJobReservation } from "./queue.ts";
+import { validateTextAttachmentPolicy } from "./text-attachment-policy.ts";
 
 export type WorkspaceGenerationRequest = { chatId: string; modelConfigId: string; prompt: string; parameters: unknown; referenceAssetIds?: unknown };
 
@@ -66,11 +67,10 @@ async function validateChatAndReferences(userId: string, chatId: string, config:
   }
   if (!referenceIds.length) return;
   if (config.generationKind === "TEXT") {
-    if (config.id !== "text-gpt-5-4-mini") throw new Error("Вложения в текстовом чате поддерживает только ChatGPT.");
-    if (referenceIds.length > 1) throw new Error("В одном запросе ChatGPT можно прикрепить один файл.");
+    validateTextAttachmentPolicy(config.id, referenceIds.length);
     const files = await db.query<{ id: string; mimeType: string }>(`SELECT id,mime_type AS "mimeType" FROM media_assets WHERE user_id=$1 AND kind='REFERENCE' AND deleted_at IS NULL AND id=ANY($2::text[])`, [userId, referenceIds]);
     if (files.rowCount !== referenceIds.length) throw new Error("Прикреплённый файл больше недоступен.");
-    if (files.rows.some((file) => !["application/pdf", "image/png", "image/jpeg"].includes(file.mimeType))) throw new Error("ChatGPT принимает PDF, JPEG и PNG.");
+    validateTextAttachmentPolicy(config.id, referenceIds.length, files.rows.map((file) => file.mimeType));
     return;
   }
   const rule = object(config.allowedParameters.referenceImages); const maximum = typeof rule.max === "number" ? rule.max : 0;

@@ -67,8 +67,9 @@ function createObjectStorage(): ObjectStorage {
 
 class LocalObjectStorage implements ObjectStorage {
   readonly driver = "local" as const;
+  private readonly root: string;
 
-  constructor(private readonly root: string) {}
+  constructor(root: string) { this.root = root; }
 
   async put(key: string, body: Uint8Array): Promise<void> {
     const target = this.pathFor(key);
@@ -117,8 +118,13 @@ class LocalObjectStorage implements ObjectStorage {
 
 class S3ObjectStorage implements ObjectStorage {
   readonly driver = "s3" as const;
+  private readonly client: S3Client;
+  private readonly bucket: string;
+  private readonly prefix: string;
 
-  constructor(private readonly client: S3Client, private readonly bucket: string, private readonly prefix: string) {}
+  constructor(client: S3Client, bucket: string, prefix: string) {
+    this.client = client; this.bucket = bucket; this.prefix = prefix;
+  }
 
   async put(key: string, body: Uint8Array, contentType: string): Promise<void> {
     await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: this.keyFor(key), Body: body, ContentType: contentType }));

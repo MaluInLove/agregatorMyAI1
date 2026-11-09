@@ -15,7 +15,10 @@
     "db:seed-models": "node scripts/seed-models.ts",
     "db:seed-stage1-tariffs": "node scripts/seed-stage-one-tariffs.ts",
     "stage0:import-results": "node scripts/import-stage0-results.ts",
-    "test:retry-safety": "node scripts/test-retry-safety.ts"
+    "test:retry-safety": "node scripts/test-retry-safety.ts",
+    "test:core": "node --test tests/retry-policy.test.ts tests/queue-contract.test.ts tests/text-attachment-policy.test.ts",
+    "test:integration": "node scripts/prepare-test-database.ts && node --import ./tests/integration/setup.ts --test tests/integration/accounting-and-queue.test.ts tests/integration/file-retention.test.ts tests/integration/access-control.test.ts",
+    "test": "npm run test:core && npm run test:retry-safety && npm run test:integration"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.775.0",

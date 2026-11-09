@@ -66,9 +66,22 @@ npm run db:seed-admin
 npm run typecheck
 npm run lint
 npm run build
+npm run test
 ```
 
 `npm run dev` требует только доступную PostgreSQL-базу. `check:env` дополнительно проверяет наличие `psql` и FFmpeg, чтобы сообщить о неполной подготовке среды до работ с видео и резервными копиями.
+
+`npm.cmd run test` запускает все автоматические проверки: правила очереди и файлов, безопасные повторы и интеграционные сценарии в отдельной БД из `TEST_DATABASE_URL`. Рабочая база и настоящее файловое хранилище в этих тестах не используются.
+
+## Docker для будущего VPS
+
+Docker Compose из `compose.yaml` поднимает PostgreSQL, разовый сервис миграций, веб-приложение и отдельный worker. Для него скопируйте `.env.docker.example` в `.env.docker`, заполните секреты и выполните:
+
+```powershell
+docker compose --project-name ai-aggregator --env-file .env.docker up --build -d
+```
+
+По умолчанию порт опубликован только на `127.0.0.1`; для VPS нужен HTTPS reverse proxy. Полная процедура резервного копирования и восстановления PostgreSQL, локального хранилища и S3 описана в [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Безопасность
 

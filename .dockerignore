@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+!.env.docker.example
+.git
+.next
+node_modules
+.artifact-node-modules
+var
+coverage
+npm-debug.log
+*.log
